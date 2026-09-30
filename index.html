@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Holy Rosary Map</title>
+    <style>
+        body { font-family: "Georgia", serif; background: linear-gradient(180deg, #E3F2FD 0%, #FFFFFF 50%, #BBDEFB 100%); color: #0D47A1; margin: 0; padding: 15px; text-align: center; overflow-x: hidden; }
+        .container { width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
+        .panel, .card { background: rgba(255, 255, 255, 0.85); border: 2px solid #90CAF9; border-radius: 20px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(13, 71, 161, 0.1); }
+        .card { background: #FFFFFF; border-color: #90CAF9; text-align: justify; }
+        .app-title { font-size: 22px; font-weight: 900; text-transform: uppercase; margin: 0; }
+        .score-row { display: flex; justify-content: space-around; font-family: sans-serif; font-weight: 800; font-size: 13px; color: #1565C0; margin-top: 5px; }
+        .card-title { font-size: 14px; font-weight: 800; color: #B71C1C; text-transform: uppercase; margin-bottom: 6px; text-align: center; }
+        .card-text { font-size: 15px; color: #212121; margin: 0; text-align: center; font-weight: bold; line-height: 1.8; }
+        .viewport { height: 230px; position: relative; margin-bottom: 12px; border-radius: 24px; overflow: hidden; background: linear-gradient(180deg, #B3E5FC 0%, #E1F5FE 100%); border: 3px solid #90CAF9; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; box-sizing: border-box; }
+        .mystery-banner { position: absolute; top: 12px; left: 12px; background: rgba(13, 71, 161, 0.85); color: #FFF; font-family: sans-serif; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; }
+        .large-node { font-size: 38px; z-index: 10; margin-top: 10px; }
+        .grid-10 { display: flex; justify-content: center; gap: 6px; width: 100%; z-index: 10; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 12px; box-sizing: border-box; }
+        .bead { font-size: 24px; width: 30px; height: 34px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .bloom { animation: roseBloom 0.5s ease-out forwards; }
+        @keyframes roseBloom { 0% { transform: scale(0.4); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 8px #FF5252); } }
+        .gift-rose { position: absolute; font-size: 28px; animation: floatToMary 2.5s ease-in-out forwards; z-index: 25; bottom: 15px; }
+        @keyframes floatToMary { 0% { bottom: 15px; left: var(--start-x); transform: scale(0.5); opacity: 1; } 100% { bottom: 130px; left: 50%; transform: translate(-50%, -50%) scale(1.2); opacity: 0; } }
+        .trust { font-family: sans-serif; font-weight: 900; font-size: 18px; text-transform: uppercase; margin: 5px 0 15px 0; color: #1565C0; opacity: 0.5; }
+        .glow { opacity: 1; color: #0D47A1; text-shadow: 0 0 10px #B3E5FC; }
+        .btn { width: 100%; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFF; border: 3px solid #FFF; padding: 15px; border-radius: 30px; font-size: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1 class="app-title" id="main-title">The Holy Rosary</h1>
+            <div class="score-row">
+                <div id="b-lbl">Bead Tracker: 1 / 58</div>
+                <div id="s-lbl">Opening Prayers</div>
+            </div>
+        </div>
+        <div class="card">
+            <div id="p-title" class="card-title">The Sign of the Cross</div>
+            <p id="p-text" class="card-text">Make the Sign of the Cross to begin your prayer journey. ✝️</p>
+        </div>
+        <div class="viewport" id="viewport">
+            <div id="mystery-node" class="mystery-banner">Opening Focus</div>
+            <div style="display:flex; justify-content:center; width:100%;"><div id="l-node" class="large-node">👑</div></div>
+            <div class="grid-10" id="matrix"></div>
+        </div>
+        <div id="t-node" class="trust">Holy Mary, Pray for Us!</div>
+        <button class="btn" id="act-btn" onclick="prayStep()">Tap to Pray Next Bead</button>
+    </div>
+
+    <!-- Injecting your clean external dataset connection here -->
+    <script src="rosary-dataset.js"></script>
+    <script>
+        var step = 0; const MAX = 58; var grp = document.getElementById('matrix');
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        var currentDayName = days[new Date().getDay()];
+        var todaySet = dailyMysteries[currentDayName];
+        document.getElementById('main-title').innerText = todaySet.name;
+
+        function getData(s) {
+            if (s === 0) return { b: "👑", s: "Opening Prayers", t: "The Sign of the Cross", p: "Make the Sign of the Cross to begin your prayer journey. ✝️", lg: true, m: "Opening Focus" };
+            if (s === 1) return { b: "残留", s: "Opening Prayers", t: "The Apostles' Creed", p: "Recite the Apostles' Creed once.\n(I believe in God, the Father Almighty...)", lg: true, m: "Opening Focus" };
+            if (s === 2) return { b: "👑", s: "Opening Prayers", t: "The Our Father", p: "Recite 1 Our Father once.\n(For the intentions of our Holy Father, the Pope)", lg: true, m: "For the Pope's Intentions" };
+            if (s === 3) return { b: "📀", s: "Opening Prayers", t: "Hail Mary", p: "Recite 1 Hail Mary once.\n(For an increase of Faith, Hope, and Charity 🌟)", lg: false, m: "Opening Theological Virtues" };
+            if (s === 4) return { b: "✨", s: "Opening Prayers", t: "Glory Be & Fatima Prayer", p: "Recite 1 Glory Be once.\nFollowed by the Fatima Prayer:\n(O my Jesus, forgive us our sins...)", lg: true, m: "Opening Focus" };
+            if (s === 55) return { b: "👑", s: "Closing Prayers", t: "Hail, Holy Queen", p: "Recite the Hail, Holy Queen.\n(Hail, Holy Queen, Mother of Mercy...)\nLook! Roses are flying to heaven for Mother Mary! 🌹", lg: true, m: "Offering Roses to Mary" };
+            if (s === 56) return { b: "💝", s: "Closing Prayers", t: "Concluding Rosary Prayer", p: "Recite the Concluding Rosary Prayer.\n(O God, whose only begotten Son...)", lg: true, m: "Final Offering" };
+            if (s === 57) return { b: "👑", s: "Closing Prayers", t: "The Sign of the Cross", p: "Make the Sign of the Cross to finish your prayer loop. ✝️", lg: true, m: "Concluded" };
+            
+            var adj = s - 5; var dec = Math.floor(adj / 10); var rem = adj % 10;
+            var mTitle = todaySet.list[dec];
+            if (rem === 0) return { b: "👑", s: "Decade " + (dec + 1), t: "The Our Father", p: "Recite 1 Our Father.\nFocus on this mystery: " + mTitle, lg: true, m: mTitle };
+            return { b: "📀", s: "Decade " + (dec + 1), t: "Hail Mary", p: "Recite 1 Hail Mary.\n(Bead " + rem + " of this decade)", lg: false, m: mTitle };
+        }
+
+        function drawMatrix() {
+            grp.innerHTML = ''; var adj = step - 5; var rem = (step >= 5 && step < 55) ? (adj % 10) : -1;
+            if (step === 3) { rem = 1; }
+            for (var i = 1; i <= 10; i++) {
+                var cell = document.createElement('div'); cell.className = 'bead';
+                if ((step === 3 && i === 1) || (rem !== 0 && i <= rem && step >= 5 && step < 55)) {
+                    cell.innerHTML = '🌹'; cell.className = 'bead bloom';
+                } else { cell.innerHTML = '📀'; }
+                grp.appendChild(cell);
+            }
+        }
+
+        function offerRoses() {
+            var v = document.getElementById('viewport');
+            for (var i = 0; i < 15; i++) {
+                setTimeout((function(x) { return function() {
+                    var p = document.createElement('div'); p.className = 'gift-rose'; p.innerHTML = '🌹';
+                    p.style.setProperty('--start-x', (Math.random() * 80 + 10) + '%'); v.appendChild(p);
+                    setTimeout(function() { p.remove(); }, 2500);
+                }; })(i), i * 150);
+            }
+        }
+
+        function prayStep() {
+            if (step < MAX - 1) {
+                step++; var n = getData(step);
+                document.getElementById('b-lbl').innerText = "Bead Tracker: " + (step + 1) + " / " + MAX;
+                document.getElementById('s-lbl').innerText = n.s; document.getElementById('p-title').innerText = n.t; document.getElementById('p-text').innerText = n.p;
+                var l = document.getElementById('l-node');
+                if (step === 55) { l.innerHTML = '👵👑'; offerRoses(); } else { l.innerText = n.lg ? n.b : "✨"; }
+                document.getElementById('mystery-node').innerText = n.m; drawMatrix();
+                if (step > 1) document.getElementById('t-node').className = "trust glow";
+                if (step === MAX - 1) {
+                    var b = document.getElementById('act-btn'); b.disabled = true; b.innerText = "Rosary Completed ✨"; b.style.background = "#2E7D32";
+                }
+            }
+        }
+        drawMatrix();
+    </script>
+</body>
+</html>
